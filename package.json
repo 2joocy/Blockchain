@@ -1,0 +1,16 @@
+{
+  "name": "Blockchain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./dist/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto": "1.0.1",
+    "@types/node": "10.12.11"
+  }
+}
