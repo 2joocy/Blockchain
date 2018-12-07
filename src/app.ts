@@ -1,7 +1,13 @@
-import {Block} from './types/Block'
+import { Block } from './types/Block'
+import { mine, NonceGeneration } from './api/mining';
 
-let block = new Block(undefined, "");
-let block2 = new Block(block, "");
-let block3 = new Block(block2, "");
-// @ts-ignore
-console.log(block3.previous.previous);
+const difficulty = 8;
+
+let block =  new Block(undefined, {
+    type: 'Transaction',
+    sender: 'William',
+    receiver: 'Chris',
+    amount: 10
+});
+
+mine(block, difficulty, NonceGeneration.RNG);
