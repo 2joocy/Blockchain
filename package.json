@@ -11,10 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/big-integer": "0.0.31",
     "@types/jest": "^23.3.10",
     "@types/node": "10.12.11",
-    "big-integer": "^1.6.40",
     "crypto": "1.0.1",
     "jest": "^23.6.0"
   }
