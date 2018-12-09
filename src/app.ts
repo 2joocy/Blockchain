@@ -1,13 +1,14 @@
-import { Block } from './types/Block'
+import { Block, Transaction } from './types/Block'
 import { mine, NonceGeneration } from './api/mining';
+import { createTransaction } from './api/transactions';
 
-const difficulty = 8;
+const difficulty = 3;
 
-let block =  new Block(undefined, {
-    type: 'Transaction',
-    sender: 'William',
-    receiver: 'Chris',
-    amount: 10
-});
+const transaction = createTransaction('william', 'chris', 1);
 
-mine(block, difficulty, NonceGeneration.RNG);
+let block =  new Block(undefined, transaction);
+
+block = mine(block, difficulty, NonceGeneration.RNG);
+
+console.log(block);
+console.log(block.generateHash())

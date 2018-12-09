@@ -12,7 +12,7 @@ export enum NonceGeneration {
  * @param block The block that needs to be mined
  * @param difficulty The network difficulty
  */
-export function mine(block: Block, difficulty: number, nonceGeneration: NonceGeneration) {
+export function mine(block: Block, difficulty: number, nonceGeneration: NonceGeneration): Block {
     if (block.getNonce() === undefined) {
         block.setNonce(getNextNonce(0, nonceGeneration));
     }
@@ -29,9 +29,9 @@ export function mine(block: Block, difficulty: number, nonceGeneration: NonceGen
         totalCalculated++;
         //console.log(`Created a new hash; ${block.generateHash()} from nonce: ${block.getNonce()}`)
     }
-    console.log(`Found valid hash: ${block.generateHash()}`);
-    console.log(`From nonce: ${block.getNonce()}`);
-    console.log(`Took: ${new Date().getTime() - startTime}ms`);
+    //console.log(`Found valid hash: ${block.generateHash()}`);
+    //console.log(`From nonce: ${block.getNonce()}`);
+    return block;
 }
 
 function getNextNonce(currentNonce: number, nonceGeneration: NonceGeneration): number {
