@@ -1,6 +1,8 @@
-import { Block } from "../types/Block";
+import { Block, gpuOptions } from "../types/Block";
+const GPU = require('gpu.js');
 
 const MAX_48BIT_NUMBER = 281474976710655;
+const gpu = new GPU();
 
 export enum NonceGeneration {
     BruteForce,
@@ -17,13 +19,22 @@ export function mine(block: Block, difficulty: number, nonceGeneration: NonceGen
         block.setNonce(getNextNonce(0, nonceGeneration));
     }
     const startTime = getNanoTime();
+    let lastLog = getNanoTime();
     let totalCalculated = 0;
     while (!hashIsValid(block.generateHash(), difficulty)) {
+        if ((getNanoTime() - lastLog) > 100000000) {
+            const average = (totalCalculated / (((getNanoTime() - startTime) / 1000000) / 1000));
+            const avg = convertToSI(average);
+            lastLog = getNanoTime();
+            console.log(`Calculated a total of: ${totalCalculated}, averaging: ${avg}`);
+        }
+        /*
         if ((getNanoTime() - startTime) % 100000 < 1) {
             const average = (totalCalculated / (((getNanoTime() - startTime) / 1000000) / 1000));
             const avg = convertToSI(average);
             console.log(`Calculated a total of: ${totalCalculated}, averaging: ${avg}`);
         }
+        */
         //@ts-ignore
         block.setNonce(getNextNonce(block.getNonce(), nonceGeneration));
         totalCalculated++;
@@ -32,6 +43,59 @@ export function mine(block: Block, difficulty: number, nonceGeneration: NonceGen
     //console.log(`Found valid hash: ${block.generateHash()}`);
     //console.log(`From nonce: ${block.getNonce()}`);
     return block;
+}
+
+/**
+ * [Slowed Down Mining] Simulates the above function, but slowed down
+ * Function to mine a block until it finds a valid nonce for the given network difficulty
+ * @param block The block that needs to be mined
+ * @param difficulty The network difficulty
+ */
+export async function CPUmine(block: Block, difficulty: number, nonceGeneration: NonceGeneration): Promise<Block> {
+    if (block.getNonce() === undefined) {
+        block.setNonce(getNextNonce(0, nonceGeneration));
+    }
+    const startTime = getNanoTime();
+    let lastLog = getNanoTime();
+    let totalCalculated = 0;
+    while (!hashIsValid(block.generateHash(), difficulty)) {
+        if ((getNanoTime() - lastLog) > 100000000) {
+            const average = (totalCalculated / (((getNanoTime() - startTime) / 1000000) / 1000));
+            const avg = convertToSI(average);
+            lastLog = getNanoTime();
+            console.log(`Calculated a total of: ${totalCalculated}, averaging: ${avg}`);
+        } else if ((getNanoTime() - lastLog) > 2000000) {
+            await delay(100);
+        }
+        //@ts-ignore
+        block.setNonce(getNextNonce(block.getNonce(), nonceGeneration));
+        totalCalculated++;
+        //console.log(`Created a new hash; ${block.generateHash()} from nonce: ${block.getNonce()}`)
+    }
+    //console.log(`Found valid hash: ${block.generateHash()}`);
+    //console.log(`From nonce: ${block.getNonce()}`);
+    return Promise.resolve(block);
+}
+
+function delay(milli: number): Promise<boolean> {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(true);
+        }, milli / 2);
+    });
+}
+
+export function mineGPU(block: Block, difficulty: number, nonceGeneration: NonceGeneration) {
+    const options: gpuOptions = {
+        output: {
+            x: 100
+        }
+    }
+    const myFunc = gpu.createKernel(function() {
+        //@ts-ignore
+        return this.thread.x;
+    }, options);
+    console.log(myFunc());
 }
 
 function getNextNonce(currentNonce: number, nonceGeneration: NonceGeneration): number {

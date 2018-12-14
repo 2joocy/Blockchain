@@ -21,13 +21,12 @@ export function createTransaction(sender: string, receiver: string, amount: numb
  * @param blockchain Must be the latest block in the blockchain
  * @param transaction The transaction to validate.
  */
-function isValid(blockchain: Block, unconfirmed: Array<Transaction>, transaction: Transaction) {
+export function isValid(blockchain: Block, transaction: Transaction) {
     const balance: Balance = {
         balance: 0,
         sender: transaction.sender
     }
     let senderBalance = getBalance(blockchain, balance);
-    senderBalance -= checkTransactions(unconfirmed, transaction.sender);
     return (senderBalance >= transaction.amount);
 }
 
@@ -36,9 +35,9 @@ function isValid(blockchain: Block, unconfirmed: Array<Transaction>, transaction
  * @param block The current block
  * @param balance The current amount the sender has as a balance
  */
-function getBalance(block: Block, balance: Balance): number {
+export function getBalance(block: Block, balance: Balance): number {
     let balanceDiff = checkTransactions(block.getTransactions(), balance.sender);
-    console.log(`The sender had: ${balance.balance} before Block: ${block.generateHash()}, now has: ${balance.balance + balanceDiff}`);
+    //console.log(`The sender had: ${balance.balance} before Block: ${block.generateHash()}, now has: ${balance.balance + balanceDiff}`);
     balance.balance += balanceDiff;
     const previous = block.getPreviousBlock();
     if (previous !== undefined) {
