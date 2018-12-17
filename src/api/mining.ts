@@ -1,7 +1,8 @@
 import { Block, getMinerReward, Transaction } from "../types/Block";
 import { createTransaction } from "./transactions";
 
-const MAX_48BIT_NUMBER = 281474976710655;
+// Each hexidecimal character = 4 bits, as 0xF = 15 = 0b1111
+const MAX_48BIT_NUMBER = 0xFFFFFFFFFFFF;
 
 export enum NonceGeneration {
     BruteForce,
