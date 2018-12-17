@@ -53,35 +53,41 @@ export class Block {
         }
     }
 
-    public mineBlock(difficulty: number, nonceGeneration: NonceGeneration): Block {
-        let result = mine(this, difficulty, nonceGeneration).getNonce();
+    public mineBlock(minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration): Block {
+        let result = mine(this, minerAddress, difficulty, nonceGeneration).getNonce();
         if (result) {
             this.setNonce(result);
         }
         return this;
     }
 
+    public getHeight(): number {
+        const prev = this.getPreviousBlock();
+        if (prev !== undefined) {
+            return prev.getHeight() + 1;
+        }
+        return 1;
+    }
+
+}
+
+/**
+ * Method of getting how much should be mined from a specific block height
+ * @param block Can either be the height of the block, or the block itself
+ */
+export function getMinerReward(block: Block | number): number {
+     //100 coins for the first <= 100.000, then 50 > 100.00 <= 200.000, then 25 > 200.000 <= 300.000, etc. (12.5, 6.25, 3.125)
+     const maxCoinsPrBlock = 100;
+     const step = 10;
+     const blockHeight = typeof(block) === "number" ? block : block.getHeight();
+     const divisor = Math.pow(2, (Math.trunc(blockHeight / step)));
+     return maxCoinsPrBlock / divisor;
 }
 
 export interface Transaction {
-
     unixEpochMilli: number;
-    sender: string;
+    sender: string | undefined;
     receiver: string;
     amount: number;
-
-}
-
-export interface gpuOptions {
-    output?: [number] | [number, number] | [number, number, number] | {
-        x?: number,
-        y?: number,
-        z?: number
-    };
-    outputToTexture?: boolean;
-    graphical?: boolean;
-    loopMaxIterations?: number;
-    constants?: object;
-    wraparound?: boolean;
-    hardcodeConstants?: boolean;
+    minersFee: number;
 }

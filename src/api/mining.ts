@@ -1,8 +1,7 @@
-import { Block, gpuOptions } from "../types/Block";
-const GPU = require('gpu.js');
+import { Block, getMinerReward, Transaction } from "../types/Block";
+import { createTransaction } from "./transactions";
 
 const MAX_48BIT_NUMBER = 281474976710655;
-const gpu = new GPU();
 
 export enum NonceGeneration {
     BruteForce,
@@ -14,7 +13,9 @@ export enum NonceGeneration {
  * @param block The block that needs to be mined
  * @param difficulty The network difficulty
  */
-export function mine(block: Block, difficulty: number, nonceGeneration: NonceGeneration): Block {
+export function mine(block: Block, minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration): Block {
+    const minerTransaction = typeof(minerAddress) === "string" ? createTransaction(undefined, minerAddress, getMinerReward(block), 0) : minerAddress;
+    block.addTransaction(minerTransaction);
     if (block.getNonce() === undefined) {
         block.setNonce(getNextNonce(0, nonceGeneration));
     }
@@ -51,7 +52,9 @@ export function mine(block: Block, difficulty: number, nonceGeneration: NonceGen
  * @param block The block that needs to be mined
  * @param difficulty The network difficulty
  */
-export async function CPUmine(block: Block, difficulty: number, nonceGeneration: NonceGeneration): Promise<Block> {
+export async function CPUmine(block: Block, minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration): Promise<Block> {
+    const minerTransaction = typeof(minerAddress) === "string" ? createTransaction(undefined, minerAddress, getMinerReward(block), 0) : minerAddress;
+    block.addTransaction(minerTransaction);
     if (block.getNonce() === undefined) {
         block.setNonce(getNextNonce(0, nonceGeneration));
     }
@@ -83,19 +86,6 @@ function delay(milli: number): Promise<boolean> {
             resolve(true);
         }, milli / 2);
     });
-}
-
-export function mineGPU(block: Block, difficulty: number, nonceGeneration: NonceGeneration) {
-    const options: gpuOptions = {
-        output: {
-            x: 100
-        }
-    }
-    const myFunc = gpu.createKernel(function() {
-        //@ts-ignore
-        return this.thread.x;
-    }, options);
-    console.log(myFunc());
 }
 
 function getNextNonce(currentNonce: number, nonceGeneration: NonceGeneration): number {

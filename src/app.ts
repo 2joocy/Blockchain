@@ -1,55 +1,42 @@
-import { Block, Transaction } from './types/Block'
-import { mine, NonceGeneration, mineGPU, CPUmine } from './api/mining';
+import { Block, Transaction, getMinerReward } from './types/Block'
+import { CPUmine, mine, NonceGeneration } from './api/mining';
 import { createTransaction, isValid, getBalance } from './api/transactions';
+import { createWallet } from './types/Wallet';
+import { createServer, createClient, createBlockMinedCommand, ActionType } from './api/net';
 
-const difficulty = 5;
-const nonceGeneration = NonceGeneration.RNG;
-
-const transaction = createTransaction('william', 'chris', 6.33);
-
-let block = new Block(undefined, transaction);
-
-mine(block, difficulty, nonceGeneration);
-
-console.log(`Found normal block nonce: ${block.getNonce()}`);
-
-CPUmine(block, difficulty, nonceGeneration).then((block) => {
-    console.log(`Found block nonce: ${block.getNonce()}`);
-});
+console.log(ActionType[ActionType.BlockMined]);
 
 
-//mineGPU(block, difficulty, NonceGeneration.BruteForce);
-
-//let block = new Block(undefined, transaction).mineBlock(difficulty, nonceGeneration);
 
 /*
 
-//console.log(block.generateHash());
+const PORT = 8088;
 
-const transaction2 = createTransaction('chris', 'viktor', 2.77);
+const server = createServer((receivedCommand) => {
+    console.log(receivedCommand);
+});
 
-if (!isValid(block, transaction2)) {
-    throw Error(`Transaction: ${JSON.stringify(transaction2)} is not valid!`);
-}
+server.listen(PORT, () => {
+    console.log(`Server is listening on port: ${PORT}`);
+});
 
-let block2 = new Block(block, transaction2).mineBlock(difficulty, nonceGeneration);
+setTimeout(() => {
+    server.close();
+}, 5000);
 
-//console.log(block2.generateHash());
+const transaction = createTransaction(undefined, 'chris', getMinerReward(0), 0);
+const block = new Block(undefined, transaction);
+const blockMinedCommand = createBlockMinedCommand(block, '123');
 
-console.log(`Chris's Balance: ${getBalance(block2, {
-    balance: 0,
-    sender: 'chris'
-})}`)
+const socket = createClient('localhost', PORT);
 
-console.log(`Viktors Balance: ${getBalance(block2, {
-    balance: 0,
-    sender: 'viktor'
-})}`)
+setTimeout(() => {
+    socket.write(JSON.stringify(blockMinedCommand), "utf8");
+}, 1000)
 
-console.log(`Williams Balance: ${getBalance(block2, {
-    balance: 0,
-    sender: 'william'
-})}`)
 
+setTimeout(() => {
+    socket.destroy();
+}, 2500);
 
 */

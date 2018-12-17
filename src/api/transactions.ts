@@ -1,4 +1,4 @@
-import { Transaction, Block } from "../types/Block";
+import { Transaction, Block, getMinerReward } from "../types/Block";
 
 /**
  * Useful tool to automatically create a transaction used as data for blocks
@@ -7,12 +7,13 @@ import { Transaction, Block } from "../types/Block";
  * @param amount the amount to be sent to the receiver
  * @param unixEpochMilli [Optional] Unix Epoch Time
  */
-export function createTransaction(sender: string, receiver: string, amount: number, unixEpochMilli?: number): Transaction {
+export function createTransaction(sender: string | undefined, receiver: string, amount: number, minersFee: number, unixEpochMilli?: number): Transaction {
     return {
         amount: amount,
         receiver: receiver,
         sender: sender,
-        unixEpochMilli: unixEpochMilli ? unixEpochMilli : new Date().getTime()
+        unixEpochMilli: unixEpochMilli ? unixEpochMilli : new Date().getTime(),
+        minersFee: minersFee
     }
 }
 
@@ -22,12 +23,15 @@ export function createTransaction(sender: string, receiver: string, amount: numb
  * @param transaction The transaction to validate.
  */
 export function isValid(blockchain: Block, transaction: Transaction) {
-    const balance: Balance = {
-        balance: 0,
-        sender: transaction.sender
+    if (transaction.sender) {
+        const balance: Balance = {
+            balance: 0,
+            sender: transaction.sender
+        }
+        let senderBalance = getBalance(blockchain, balance);
+        return (senderBalance >= transaction.amount);
     }
-    let senderBalance = getBalance(blockchain, balance);
-    return (senderBalance >= transaction.amount);
+    return transaction.amount === getMinerReward(blockchain);
 }
 
 /**
@@ -36,7 +40,8 @@ export function isValid(blockchain: Block, transaction: Transaction) {
  * @param balance The current amount the sender has as a balance
  */
 export function getBalance(block: Block, balance: Balance): number {
-    let balanceDiff = checkTransactions(block.getTransactions(), balance.sender);
+    let minerAddress = findMinerAddress(block);
+    let balanceDiff = checkTransactions(block.getTransactions(), balance.sender, minerAddress);
     //console.log(`The sender had: ${balance.balance} before Block: ${block.generateHash()}, now has: ${balance.balance + balanceDiff}`);
     balance.balance += balanceDiff;
     const previous = block.getPreviousBlock();
@@ -51,17 +56,41 @@ export function getBalance(block: Block, balance: Balance): number {
  * @param transcations List of transactiosn to be checked
  * @param sender Person who is attempting to send the money
  */
-function checkTransactions(transcations: Array<Transaction> | undefined, sender: string): number {
+function checkTransactions(transcations: Array<Transaction> | undefined, sender: string, minerAddress: string): number {
     let total = 0;
     transcations && transcations.forEach(transaction => {
         if (transaction.sender === sender) {
             total -= transaction.amount;
         } else if (transaction.receiver === sender) {
-            total += transaction.amount;
+            let minersFee = transaction.minersFee * getTransactionLength(transaction);
+            total += (transaction.amount - minersFee);
         }
     });
     return total;
 }
+
+/**
+ * Finds the miners address from the miner transaction of a block
+ * @param block The block to find the miners' transaction from
+ */
+function findMinerAddress(block: Block) {
+    const transactions = block.getTransactions();
+    for (let i = 0; i < transactions.length; i++) {
+        if (transactions[i].sender === undefined) {
+            return transactions[i].receiver;
+        }
+    }
+    throw Error(`No miner transaction found in block #${block.getHeight()}`);
+}
+
+/**
+ * Calculates the length of the transaction to calculate the final minersFee
+ * @param transaction The transaction to get length from
+ */
+function getTransactionLength(transaction: Transaction) {
+    return JSON.stringify(transaction).length;
+}
+
 
 interface Balance {
     sender: string;

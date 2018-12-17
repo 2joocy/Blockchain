@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "e": "electron ./dist/app.js",
     "start": "node ./dist/app.js",
     "test": "jest"
   },
@@ -14,7 +15,6 @@
     "@types/jest": "^23.3.10",
     "@types/node": "10.12.11",
     "crypto": "1.0.1",
-    "gpu.js": "^1.10.4",
     "jest": "^23.6.0"
   }
 }
