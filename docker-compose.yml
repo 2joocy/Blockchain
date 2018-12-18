@@ -1,0 +1,15 @@
+version: "2"
+
+  service:
+    bingoserv:
+      build: server/Dockerfile
+      ports: 8585
+    bingoblock1:
+      build: ./Dockerfile
+    bingoblock2:
+      build: ./Dockerfile
+    bingoblock3:
+      build: ./Dockerfile
+    bingoblock4:
+      build: ./Dockerfile
+    
