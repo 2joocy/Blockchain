@@ -1,4 +1,5 @@
-# Block Chain - Bingo Bois
+# Block Chain - Bingo Bois 
+## By: Chris Rosendorf, Viktor Kim Christiansen, Christian Engelberth Olsen, Zaeem Shafiq og William Pfaffe
 
 ## Documentation
 Each node has a set of connections that it keeps, of all it’s clients. Those clients are being sent information, and when being sent to, uses a controller to decide whichever action it should take with the given connection. 
