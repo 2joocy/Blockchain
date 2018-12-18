@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  bingoserv:
+    image: blockserv
+    ports: 
+    - 8585
+  bingoblock1:
+    image: block
+  bingoblock2:
+    image: block
+  bingoblock3:
+    image: block
+  bingoblock4:
+    image: block
