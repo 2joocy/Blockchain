@@ -1,68 +1,38 @@
 import { Block, Transaction, getMinerReward } from './types/Block'
 import { CPUmine, mine, NonceGeneration } from './api/mining';
-import { createTransaction, isValid, getBalance } from './api/transactions';
-import { createWallet } from './types/Wallet';
-import { createServer, createClient, createBlockMinedCommand, createNewTransactionCommand, ActionType, createAddressGetCommand } from './api/net';
+import { createTransaction, isValid, getBalance, verifyTransaction } from './api/transactions';
+import { createServer, createClient, createBlockMinedCommand, createNewTransactionCommand, ActionType, createAddressGetCommand, createBlocksGetCommand } from './api/net';
 import { saveBlockchain, loadBlockchain } from './api/file';
+import { createKeyPairs } from './types/Wallet';
+import { initalizeNetwork, getConnections } from './controllers/tcpController';
 
-/*
+//Every time it mines, create new transaction for 1 coin into randomly chosen public key, announce to network.
 
-const server = createServer((command, socket) => {
-    console.log(command);
-    console.log(`REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ${socket.remoteAddress}`);
-});
-server.listen(8585);
+let blockchain: Block;
+let keys;
 
-const socket = createClient('2.108.240.90', 8585);
-socket.on('data', (data) => {
-    console.log(data.toString('utf8'));
-});
-socket.write(JSON.stringify(createAddressGetCommand()));
+function init() {
+    keys = createKeyPairs();
+    initalizeNetwork(8585);
 
-/*
-const block = new Block(undefined, createTransaction('Chris', 'William', 10, 0.01), 23);
-const block2 = new Block(block, createTransaction('Viktor', 'Chris', 5, 0.5), 22);
-const block3 = new Block(block2, createTransaction('Viktor', 'Chris', 5, 0.5));
+    const command = createBlocksGetCommand(0);
+    let connection = getConnections()[0];
 
-saveBlockchain(block3);
-let loadedBlocks = loadBlockchain();
-console.log(loadedBlocks);
-loadedBlocks.setNonce(23);
-console.log(loadedBlocks.generateHash());
-
-/*
-console.log(loadedBlocks);
-console.log(loadedBlocks.getHeight());
-
-/*
-const PORT = 8585;
-
-const server = createServer((receivedCommand) => {
-    console.log(`Received ${ActionType[receivedCommand.action]} command`);
-});
-
-server.listen(PORT, () => {
-    console.log(`Server is listening on port: ${PORT}`);
-});
-
-setTimeout(() => {
-    server.close();
-}, 5000);
-
-const transaction = createTransaction(undefined, 'chris', getMinerReward(0), 0);
-const block = new Block(undefined, transaction);
-const blockMinedCommand = createBlockMinedCommand(block, '123');
-const transactionCommand = createNewTransactionCommand(transaction);
-
-const socket = createClient('localhost', PORT);
-
-setTimeout(() => {
-    socket.write(JSON.stringify(transactionCommand), "utf8");
-}, 1000)
+    //connection.write()
+}
 
 
-setTimeout(() => {
-    socket.destroy();
-}, 2500);
+function startMining() {
+    let random = Math.random();
+    if (random > 0.5) {
+        //Mine
+        //@ts-ignore
+        mine();
+    } else {
+        //CPUMine
+        //@ts-ignore
+        CPUmine();
+    }
+}
 
-*/
+

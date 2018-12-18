@@ -3,6 +3,7 @@ import { Transaction, blockchainIsValid } from '../types/Block';
 import { Server, Socket } from 'net';
 import { inflateBlockchain } from '../api/file';
 
+const DNS_SEED_IP = '173.249.57.239';
 let CONNECTION_ARR: Array<Socket> = [];
 
 let server: Server;
@@ -21,7 +22,7 @@ export function initalizeNetwork(port: number) {
 
 
     //TODO: Change DNS_SEED to DNS_SEED IP
-    const socket = createClient('DNS_SEED', 8585);
+    const socket = createClient(DNS_SEED_IP, 8585);
     const request = createAddressGetCommand();
     socket.write(JSON.stringify(request));
     CONNECTION_ARR.push(socket);
@@ -53,6 +54,9 @@ export function handleActions(tcpCommand: TCPCommand, socket: Socket) {
     
             case ActionType.BlockMined:
                 let blockMinedData = <BlockMinedData> tcpCommand.data;
+                if (blockchainIsValid(blockMinedData.block)) {
+
+                }
                 //TODO: Figure out access to Block, call containsBlock on it with blockMinedData.block
                 //TODO: Validate the block, and add it to the Blockchain, then resend it once to all connections
                 break;
@@ -99,4 +103,8 @@ function randomConnections(): Array<string> {
         }
     }
     return randomArray;
+}
+
+export function getConnections() {
+    return CONNECTION_ARR;
 }

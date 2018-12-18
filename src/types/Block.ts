@@ -54,8 +54,8 @@ export class Block {
         }
     }
 
-    public mineBlock(minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration): Block {
-        let result = mine(this, minerAddress, difficulty, nonceGeneration).getNonce();
+    public mineBlock(minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration, privateKey: string): Block {
+        let result = mine(this, minerAddress, difficulty, nonceGeneration, privateKey).getNonce();
         if (result) {
             this.setNonce(result);
         }
@@ -71,10 +71,10 @@ export class Block {
     }
 
     /**
-     * Every 20th block, the difficulty increases
+     * Every 5th block, the difficulty increases
      */
     public getDifficulty(): number {
-        return this.getHeight() / 20;
+        return Math.ceil(this.getHeight() / 5) + 3;
     }
 
     public containsBlock(block: Block): boolean {
@@ -122,9 +122,10 @@ function getGenesisBlock(block: Block): Block {
 }
 
 export interface Transaction {
-    unixEpochMilli: number;
     sender: string | undefined;
     receiver: string;
     amount: number;
     minersFee: number;
+    unixEpochMilli: number;
+    signature?: string;
 }

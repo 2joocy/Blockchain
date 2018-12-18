@@ -1,4 +1,5 @@
 import { Transaction, Block, getMinerReward } from "../types/Block";
+import crypto from 'crypto';
 
 /**
  * Useful tool to automatically create a transaction used as data for blocks
@@ -8,13 +9,58 @@ import { Transaction, Block, getMinerReward } from "../types/Block";
  * @param unixEpochMilli [Optional] Unix Epoch Time
  */
 export function createTransaction(sender: string | undefined, receiver: string, amount: number, minersFee: number, privateKey: string, unixEpochMilli?: number): Transaction {
-    return {
+    let readyToSign: Transaction = {
         amount: amount,
+        minersFee: minersFee,
         receiver: receiver,
         sender: sender,
-        unixEpochMilli: unixEpochMilli ? unixEpochMilli : new Date().getTime(),
-        minersFee: minersFee
+        unixEpochMilli: unixEpochMilli ? unixEpochMilli : new Date().getTime()
+    };
+    let stringified = JSON.stringify(readyToSign);
+    console.log(stringified);
+    let signature = sign(stringified, privateKey);
+    readyToSign.signature = signature;
+    return readyToSign;
+}
+
+/**
+ * Verifies a transaction based on the public key given
+ * @param transaction The transaction to check
+ * @param publicKey Public key to verify signature in given transaction
+ */
+export function verifyTransaction(transaction: Transaction) {
+    if (!transaction.signature) {
+        return false;
     }
+    //Transaction has a public key to check from
+    if (transaction.sender) {
+        let newTransaction: Transaction = {
+            amount: transaction.amount,
+            minersFee: transaction.minersFee,
+            receiver: transaction.receiver,
+            sender: transaction.sender,
+            unixEpochMilli: transaction.unixEpochMilli
+        }
+        let stringified = JSON.stringify(newTransaction);
+        console.log(stringified);
+        return verify(stringified, transaction.signature, transaction.sender);
+    } else {
+        /* How can we check if the transaction is made by the miner of a specific block? */
+        //We need to ensure that the transactions cannot be spoofed, and be given free coins from the system
+    }
+    return false;
+}
+
+function sign(data: string, privateKey: string): string {
+    let signer = crypto.createSign('sha256');
+    signer.update(data);
+    return signer.sign(privateKey, "hex");
+} 
+
+function verify(data: string, signature: string, publicKey: string) {
+    let verifier = crypto.createVerify('sha256');
+    verifier.update(data);
+    return verifier.verify(publicKey, signature, 'hex');
 }
 
 /**
