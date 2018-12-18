@@ -6,15 +6,19 @@
   "scripts": {
     "e": "electron ./dist/app.js",
     "start": "node ./dist/app.js",
-    "test": "jest"
+    "test": "jest",
+    "w": "jest -t 'dist/__tests__/wallet.test.js'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/bitcoinjs-lib": "^4.0.0",
     "@types/jest": "^23.3.10",
     "@types/node": "10.12.11",
+    "bitcoinjs-lib": "^4.0.2",
     "crypto": "1.0.1",
-    "jest": "^23.6.0"
+    "jest": "^23.6.0",
+    "secure-random": "^1.1.1"
   }
 }

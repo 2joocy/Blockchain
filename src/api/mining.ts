@@ -14,8 +14,8 @@ export enum NonceGeneration {
  * @param block The block that needs to be mined
  * @param difficulty The network difficulty
  */
-export function mine(block: Block, minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration): Block {
-    const minerTransaction = typeof(minerAddress) === "string" ? createTransaction(undefined, minerAddress, getMinerReward(block), 0) : minerAddress;
+export function mine(block: Block, minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration, privateKey: string): Block {
+    const minerTransaction = typeof(minerAddress) === "string" ? createTransaction(undefined, minerAddress, getMinerReward(block), 0, privateKey) : minerAddress;
     block.addTransaction(minerTransaction);
     if (block.getNonce() === undefined) {
         block.setNonce(getNextNonce(0, nonceGeneration));
@@ -30,13 +30,6 @@ export function mine(block: Block, minerAddress: string | Transaction, difficult
             lastLog = getNanoTime();
             console.log(`Calculated a total of: ${totalCalculated}, averaging: ${avg}`);
         }
-        /*
-        if ((getNanoTime() - startTime) % 100000 < 1) {
-            const average = (totalCalculated / (((getNanoTime() - startTime) / 1000000) / 1000));
-            const avg = convertToSI(average);
-            console.log(`Calculated a total of: ${totalCalculated}, averaging: ${avg}`);
-        }
-        */
         //@ts-ignore
         block.setNonce(getNextNonce(block.getNonce(), nonceGeneration));
         totalCalculated++;
@@ -53,8 +46,8 @@ export function mine(block: Block, minerAddress: string | Transaction, difficult
  * @param block The block that needs to be mined
  * @param difficulty The network difficulty
  */
-export async function CPUmine(block: Block, minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration): Promise<Block> {
-    const minerTransaction = typeof(minerAddress) === "string" ? createTransaction(undefined, minerAddress, getMinerReward(block), 0) : minerAddress;
+export async function CPUmine(block: Block, minerAddress: string | Transaction, difficulty: number, nonceGeneration: NonceGeneration, privateKey: string): Promise<Block> {
+    const minerTransaction = typeof(minerAddress) === "string" ? createTransaction(undefined, minerAddress, getMinerReward(block), 0, privateKey) : minerAddress;
     block.addTransaction(minerTransaction);
     if (block.getNonce() === undefined) {
         block.setNonce(getNextNonce(0, nonceGeneration));
@@ -89,16 +82,15 @@ function delay(milli: number): Promise<boolean> {
     });
 }
 
+/**
+ * Generates a new nonce based on which NonceGeneration is chosen
+ */
 function getNextNonce(currentNonce: number, nonceGeneration: NonceGeneration): number {
     switch (nonceGeneration) {
         case NonceGeneration.BruteForce:
             return currentNonce + 1;
 
         case NonceGeneration.RNG:
-        /*
-            const random = randomBytes(6).toString('hex');
-            const parsed = parseInt(random, 16);
-        */
             //console.log(`Creating a new nonce, old nonce: ${currentNonce}, random number: ${random}, parsed: ${parsed}`);
             return Math.floor(Math.random() * MAX_48BIT_NUMBER);
         
@@ -113,7 +105,7 @@ function getNextNonce(currentNonce: number, nonceGeneration: NonceGeneration): n
  * @param hash The hash that is being tested
  * @param difficulty The amount of leading zeroes
  */
-function hashIsValid(hash: string, difficulty: number) {
+export function hashIsValid(hash: string, difficulty: number) {
     for (let i = 0; i < difficulty; i++) {
         //console.log(`Checking hash: ${hash}, with difficulty: ${difficulty}`);
         if (hash.charAt(i) !== '0') {
@@ -121,6 +113,11 @@ function hashIsValid(hash: string, difficulty: number) {
         }
     }
     return true;
+}
+
+export function calculateDifficulty(height: number | Block) {
+    height = (typeof(height) === 'number' ? height : height.getHeight());
+    
 }
 
 /**

@@ -1,9 +1,10 @@
 import net, { Server, Socket } from 'net';
 import { Block, Transaction } from '../types/Block';
+import { deflateBlockchain } from './file';
 
 /**
- * AddressGet: Command to request a random number of current connections
- * AddressUpdate: Response to AddressGet, contains a list of connections
+ * AddressGet: Command to request a random number of current connections from specified IP
+ * AddressUpdate: Response to AddressGet, contains a list of IP addresses
  * BlockMined: Announcement to the network that a block has been mined
  * BlocksGet: Command to request all blocks after a given height (or undefined)
  * BlocksUpdate: Response to BlocksGet, contains a list of blocks
@@ -15,10 +16,11 @@ export enum ActionType {
     BlockMined,
     BlocksGet,
     BlocksUpdate,
-    NewTransaction,
+    IsAlive,
+    NewTransaction
 }
 
-interface BlockMinedData {
+export interface BlockMinedData {
     block: Block;
     publicKey: string;
 }
@@ -26,17 +28,28 @@ interface BlockMinedData {
 export class TCPCommand {
 
     public action: ActionType;
-    public data: BlockMinedData | Transaction;
+    public data: undefined | Array<string> | BlockMinedData | number | Buffer | Transaction;
 
-    constructor(action: ActionType, data: BlockMinedData | Transaction) {
+    constructor(action: ActionType, data: undefined | Array<string> | BlockMinedData | number | Buffer | Transaction) {
         this.action = action;
         this.data = data;
     }
 
 }
+/**
+ * AddressGet: Command to request a random number of current connections from specified IP
+ * AddressUpdate: Response to AddressGet, contains a list of connections
+ * BlockMined: Announcement to the network that a block has been mined
+ * BlocksGet: Command to request all blocks after a given height (or undefined)
+ * BlocksUpdate: Response to BlocksGet, contains a list of blocks
+ * NewTransaction: Announcement to the network a transaction has been made
+ */
+export function createAddressGetCommand() {
+    return new TCPCommand(ActionType.AddressGet, undefined);
+}
 
-export function createNewTransactionCommand(transaction: Transaction): TCPCommand {
-    return new TCPCommand(ActionType.NewTransaction, transaction);
+export function createAddressUpdateCommand(sockets: Array<string>) {
+    return new TCPCommand(ActionType.AddressUpdate, sockets);
 }
 
 export function createBlockMinedCommand(block: Block, publicKey: string): TCPCommand {
@@ -47,7 +60,20 @@ export function createBlockMinedCommand(block: Block, publicKey: string): TCPCom
     return new TCPCommand(ActionType.BlockMined, mined);
 }
 
-export function createServer(onData: (tcpCommand: TCPCommand) => void): Server {
+export function createBlocksGetCommand(height: Block | number) {
+    return new TCPCommand(ActionType.BlocksGet, typeof(height) === 'number' ? height : height.getHeight());
+}
+
+export function createBlocksUpdateCommand(block: Block) {
+    let buffer = deflateBlockchain(block);
+    return new TCPCommand(ActionType.BlocksUpdate, buffer);
+}
+
+export function createNewTransactionCommand(transaction: Transaction): TCPCommand {
+    return new TCPCommand(ActionType.NewTransaction, transaction);
+}
+
+export function createServer(onData: (tcpCommand: TCPCommand, socket: net.Socket) => void): Server {
     return net.createServer((socket) => {
         //When a new socket connects
         //console.log(`New socket has connected!`);
@@ -56,7 +82,7 @@ export function createServer(onData: (tcpCommand: TCPCommand) => void): Server {
             try {
                 const tcpCommand = <TCPCommand> JSON.parse(data.toString('utf8'));
                 //console.log(`Received ${ActionType[tcpCommand.action]} command from socket: ${data.toString('utf8')}`);
-                onData(tcpCommand);
+                onData(tcpCommand, socket);
             } catch (err) {
                 console.log(`Received an unparsable message from socket, this is the data: ${data.toString('utf8')}`);
                 console.log(err);

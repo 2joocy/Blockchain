@@ -7,7 +7,7 @@ import { Transaction, Block, getMinerReward } from "../types/Block";
  * @param amount the amount to be sent to the receiver
  * @param unixEpochMilli [Optional] Unix Epoch Time
  */
-export function createTransaction(sender: string | undefined, receiver: string, amount: number, minersFee: number, unixEpochMilli?: number): Transaction {
+export function createTransaction(sender: string | undefined, receiver: string, amount: number, minersFee: number, privateKey: string, unixEpochMilli?: number): Transaction {
     return {
         amount: amount,
         receiver: receiver,
@@ -64,6 +64,9 @@ function checkTransactions(transcations: Array<Transaction> | undefined, sender:
         } else if (transaction.receiver === sender) {
             let minersFee = transaction.minersFee * getTransactionLength(transaction);
             total += (transaction.amount - minersFee);
+            if (transaction.receiver === minerAddress) {
+                total += minersFee;
+            }
         }
     });
     return total;
@@ -90,7 +93,6 @@ function findMinerAddress(block: Block) {
 function getTransactionLength(transaction: Transaction) {
     return JSON.stringify(transaction).length;
 }
-
 
 interface Balance {
     sender: string;
