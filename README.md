@@ -70,17 +70,17 @@ So far, these commands are supported
 
 ## Sources
 
-> https://en.wikipedia.org/wiki/Cryptographic_nonce
-> Helped explain what a “nonce” is, and why it’s used
-> https://lisk.io/academy/blockchain-basics/blockchain-basics-intro 
-> Basic glossary and quick-tips guide to how the networking is done in a blockchain architecture
-> https://medium.com/@sahityakumarsuman/blockchain-3-layer-architecture-51e8bb2388cf
-> Article, where a user shows the structure of “blocks”, and references nice terms like “Genesis Block” etc.
-> https://support.bitpay.com/hc/en-us/articles/115003393863-What-are-bitcoin-miner-fees-Why-are-miner-fees-so-high-
-> Explains nicely why there’s a need for a miners fee, and what it does to help blockchain currency users and it’s services
-> https://www.youtube.com/watch?v=xIDL_akeras
-> Youtube video explaining public and private keys, and each of their uses and possible security measurements.
-> https://www.youtube.com/watch?v=SSo_EIwHSd4
-> A super quick guide /  youtube video showing overall structure of blockchains and how the system works (Very broad)
-> https://medium.com/@hlopez_/how-are-public-and-private-keys-created-in-bitcoin-f90b2b88f40a
-> Goes over nicely SHA256 encryption and gives more understanding into how encrypting works for blockchains
+- https://en.wikipedia.org/wiki/Cryptographic_nonce
+    - Helped explain what a “nonce” is, and why it’s used
+- https://lisk.io/academy/blockchain-basics/blockchain-basics-intro
+    - Basic glossary and quick-tips guide to how the networking is done in a blockchain architecture
+- https://medium.com/@sahityakumarsuman/blockchain-3-layer-architecture-51e8bb2388cf
+    - Article, where a user shows the structure of “blocks”, and references nice terms like “Genesis Block” etc.
+- https://support.bitpay.com/hc/en-us/articles/115003393863-What-are-bitcoin-miner-fees-Why-are-miner-fees-so-high-
+    - Explains nicely why there’s a need for a miners fee, and what it does to help blockchain currency users and it’s services
+- https://www.youtube.com/watch?v=xIDL_akeras
+    - Youtube video explaining public and private keys, and each of their uses and possible security measurements.
+- https://www.youtube.com/watch?v=SSo_EIwHSd4
+    - A super quick guide /  youtube video showing overall structure of blockchains and how the system works (Very broad)
+- https://medium.com/@hlopez_/how-are-public-and-private-keys-created-in-bitcoin-f90b2b88f40a
+    - Goes over nicely SHA256 encryption and gives more understanding into how encrypting works for blockchains
